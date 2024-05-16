@@ -46,23 +46,15 @@ const ResultSection = ({ formValues }: ResultSectionProps) => {
   });
 
   if (results[0].isLoading || results[1].isLoading) {
-    return (
-      <section className="rounded-md bg-white p-4 shadow-sm">
-        Loading...
-      </section>
-    );
+    return <section>Loading...</section>;
   }
 
   if (results[0].isError || results[1].isError) {
-    return (
-      <section className="rounded-md bg-white p-4 shadow-sm">Error</section>
-    );
+    return <section>Error</section>;
   }
 
   if (results[0].data === undefined || results[1].data === undefined) {
-    return (
-      <section className="rounded-md bg-white p-4 shadow-sm">No data</section>
-    );
+    return <section>No data</section>;
   }
 
   const [schema, forms] = [results[0].data.data, results[1].data.data];
@@ -70,7 +62,7 @@ const ResultSection = ({ formValues }: ResultSectionProps) => {
   const { headers, data } = getResultSectionDataTableData({ schema, forms });
 
   return (
-    <section className="rounded-md bg-white shadow-sm">
+    <section>
       <ResultSectionDataTable headers={headers} data={data} />
     </section>
   );

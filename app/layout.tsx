@@ -22,12 +22,7 @@ const metadata: Metadata = {
 const RootLayout = ({ children }: PropsWithChildren) => {
   return (
     <html lang="ko-KR">
-      <body
-        className={cn(
-          wantedSansVariable.className,
-          'bg-neutral-100 px-2 py-4 md:px-4',
-        )}
-      >
+      <body className={cn(wantedSansVariable.className, 'bg-neutral-100')}>
         <RecoilRootProvider>
           <QueryProvider>{children}</QueryProvider>
         </RecoilRootProvider>
