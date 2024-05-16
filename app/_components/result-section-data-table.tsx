@@ -14,6 +14,7 @@ import {
 import { format } from 'date-fns';
 import { ArrowUpDown } from 'lucide-react';
 
+import { type ReadSchemaResponseDto } from '@/__generated__/data-contracts';
 import { DataTableViewOptions } from '@/components/etc/data-table-view-options';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,17 +25,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { capitalize } from '@/lib/utils';
 import { type AnswerValue } from '@/types/answer-value';
 
 type ResultSectionDataTableProps = {
   headers: string[];
   data: Record<string, AnswerValue>[];
+  schema: ReadSchemaResponseDto;
 };
 
 const ResultSectionDataTable = ({
   headers,
   data,
+  schema,
 }: ResultSectionDataTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -44,17 +52,49 @@ const ResultSectionDataTable = ({
       return {
         accessorKey: header,
         header: ({ column }) => {
+          if (header === 'id' || header === 'createdAt') {
+            return (
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === 'asc')
+                }
+              >
+                {capitalize(header)}
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+              </Button>
+            );
+          }
+
+          const question = schema.questions.find(
+            (question) => question.key === header,
+          );
+
+          if (question === undefined) {
+            throw new Error(`Question not found: ${header}`);
+          }
+
           return (
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === 'asc')
-              }
-            >
-              {capitalize(header)}
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() =>
+                    column.toggleSorting(column.getIsSorted() === 'asc')
+                  }
+                >
+                  {capitalize(header)}
+                  {!question.isOptional && <p className="text-red-400">*</p>}
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {question.type}
+                {question.isArray && '[]'}
+              </TooltipContent>
+            </Tooltip>
           );
         },
         cell: ({ row }) => {

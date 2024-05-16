@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 
 import { type PropsWithChildren } from 'react';
 
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import QueryProvider from '@/providers/query-provider';
 import RecoilRootProvider from '@/providers/recoil-root-provider';
@@ -24,7 +25,9 @@ const RootLayout = ({ children }: PropsWithChildren) => {
     <html lang="ko-KR">
       <body className={cn(wantedSansVariable.className, 'bg-neutral-100')}>
         <RecoilRootProvider>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </QueryProvider>
         </RecoilRootProvider>
       </body>
     </html>

@@ -63,7 +63,7 @@ const ResultSection = ({ formValues }: ResultSectionProps) => {
 
   return (
     <section>
-      <ResultSectionDataTable headers={headers} data={data} />
+      <ResultSectionDataTable headers={headers} data={data} schema={schema} />
     </section>
   );
 };

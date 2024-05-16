@@ -26,11 +26,7 @@ const DataTableViewOptions = <TData extends unknown>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="ml-auto hidden h-8 lg:flex"
-        >
+        <Button variant="outline" size="sm" className="ml-auto flex h-8">
           Columns
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
