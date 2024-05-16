@@ -3,7 +3,9 @@ import localFont from 'next/font/local';
 
 import { type PropsWithChildren } from 'react';
 
+import { cn } from '@/lib/utils';
 import QueryProvider from '@/providers/query-provider';
+import RecoilRootProvider from '@/providers/recoil-root-provider';
 
 import './globals.css';
 
@@ -13,16 +15,18 @@ const wantedSansVariable = localFont({
 });
 
 const metadata: Metadata = {
-  title: '우테코 따라잡기',
-  description: '우테코 따라잡기',
+  title: 'Surveey 어드민',
+  description: 'Surveey 어드민',
 };
 
 const RootLayout = ({ children }: PropsWithChildren) => {
   return (
     <html lang="ko-KR">
-      <QueryProvider>
-        <body className={wantedSansVariable.className}>{children}</body>
-      </QueryProvider>
+      <body className={cn(wantedSansVariable.className, 'bg-neutral-100 p-4')}>
+        <RecoilRootProvider>
+          <QueryProvider>{children}</QueryProvider>
+        </RecoilRootProvider>
+      </body>
     </html>
   );
 };
