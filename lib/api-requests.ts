@@ -7,12 +7,11 @@ type AxiosGetSchemaParams = {
 };
 
 const axiosGetSchema = ({ clientName, schemaSlug }: AxiosGetSchemaParams) => {
-  return () =>
-    apiInstance.schemas.schemasControllerFindOne(schemaSlug, {
-      headers: {
-        [HTTP_HEADERS.CLIENT_NAME_KEY]: clientName,
-      },
-    });
+  return apiInstance.schemas.schemasControllerFindOne(schemaSlug, {
+    headers: {
+      [HTTP_HEADERS.CLIENT_NAME_KEY]: clientName,
+    },
+  });
 };
 
 type AxiosGetFormsParams = {
@@ -21,31 +20,33 @@ type AxiosGetFormsParams = {
 };
 
 const axiosGetForms = ({ clientName, schemaSlug }: AxiosGetFormsParams) => {
-  return () =>
-    apiInstance.forms.formsControllerFindAll(schemaSlug, {
-      headers: {
-        [HTTP_HEADERS.CLIENT_NAME_KEY]: clientName,
-      },
-    });
+  return apiInstance.forms.formsControllerFindAll(schemaSlug, {
+    headers: {
+      [HTTP_HEADERS.CLIENT_NAME_KEY]: clientName,
+    },
+  });
 };
 
-type AxiosGetFormParams = {
+type AxiosBatchDeleteFormParams = {
   clientName: string;
   schemaSlug: string;
-  formId: number;
+  ids: number[];
 };
 
-const axiosGetForm = async ({
+const axiosBatchDeleteForm = async ({
   clientName,
   schemaSlug,
-  formId,
-}: AxiosGetFormParams) => {
-  return () =>
-    apiInstance.forms.formsControllerFindOneById(schemaSlug, formId, {
+  ids,
+}: AxiosBatchDeleteFormParams) => {
+  return apiInstance.forms.formsControllerBatchRemove(
+    schemaSlug,
+    { ids },
+    {
       headers: {
         [HTTP_HEADERS.CLIENT_NAME_KEY]: clientName,
       },
-    });
+    },
+  );
 };
 
-export { axiosGetForm, axiosGetForms, axiosGetSchema };
+export { axiosBatchDeleteForm, axiosGetForms, axiosGetSchema };

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   type ColumnDef,
   type SortingState,
@@ -12,11 +13,13 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { type ReadSchemaResponseDto } from '@/__generated__/data-contracts';
 import { DataTableViewOptions } from '@/components/etc/data-table-view-options';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -25,29 +28,83 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Toggle } from '@/components/ui/toggle';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { capitalize } from '@/lib/utils';
+import { type FormValues } from '@/constants/form';
+import { TOAST_MESSAGES } from '@/constants/messages';
+import { QUERY_KEYS } from '@/constants/query-keys';
+import { axiosBatchDeleteForm } from '@/lib/api-requests';
+import { capitalize, cn } from '@/lib/utils';
 import { type AnswerValue } from '@/types/answer-value';
 
 type ResultSectionDataTableProps = {
   headers: string[];
   data: Record<string, AnswerValue>[];
   schema: ReadSchemaResponseDto;
+  formValues: FormValues;
 };
 
 const ResultSectionDataTable = ({
   headers,
   data,
   schema,
+  formValues,
 }: ResultSectionDataTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [isSelectMode, setIsSelectMode] = useState(false);
 
-  const columns: ColumnDef<Record<string, AnswerValue>>[] = headers.map(
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: axiosBatchDeleteForm,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.FORMS(formValues),
+      });
+
+      toast.success(TOAST_MESSAGES.FORM_DELETE_SUCCESS);
+
+      setRowSelection({});
+    },
+    onError: () => {
+      toast.error(TOAST_MESSAGES.FORM_DELETE_ERROR);
+    },
+  });
+
+  const prefixColumns: ColumnDef<Record<string, AnswerValue>>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          className={cn('ml-4 mr-2 hidden', isSelectMode && 'block')}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          className={cn('ml-4 mr-2 hidden', isSelectMode && 'block')}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+  ];
+
+  const dataColumns: ColumnDef<Record<string, AnswerValue>>[] = headers.map(
     (header) => {
       return {
         accessorKey: header,
@@ -138,6 +195,8 @@ const ResultSectionDataTable = ({
     },
   );
 
+  const columns = [...prefixColumns, ...dataColumns];
+
   const table = useReactTable({
     data,
     columns,
@@ -145,15 +204,60 @@ const ResultSectionDataTable = ({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnVisibility,
+      rowSelection,
     },
   });
 
+  const toggleIsSelectMode = () => {
+    if (isSelectMode) {
+      setRowSelection({});
+    }
+
+    setIsSelectMode((isSelectMode) => !isSelectMode);
+  };
+
   return (
     <div>
-      <DataTableViewOptions table={table} />
+      <div className="flex h-10 items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Toggle size="sm" onClick={toggleIsSelectMode}>
+            Select
+          </Toggle>
+          {isSelectMode && (
+            <p className="ml-2 text-sm text-neutral-700">
+              {table.getFilteredSelectedRowModel().rows.length} of{' '}
+              {table.getFilteredRowModel().rows.length} row(s) selected.
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {isSelectMode && (
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() =>
+                mutate({
+                  ...formValues,
+                  ids: table
+                    .getFilteredSelectedRowModel()
+                    .rows.map((row) => row.original.id as number),
+                })
+              }
+              disabled={
+                table.getFilteredSelectedRowModel().rows.length === 0 ||
+                isPending
+              }
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+          {!isSelectMode && <DataTableViewOptions table={table} />}
+        </div>
+      </div>
       <div className="mt-2 rounded-md bg-white shadow-sm">
         <Table>
           <TableHeader>

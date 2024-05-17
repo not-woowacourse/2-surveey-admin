@@ -11,7 +11,9 @@
  * ---------------------------------------------------------------
  */
 import {
+  BatchDeleteFormDto,
   CreateFormDto,
+  FormsControllerBatchRemoveData,
   FormsControllerCreateData,
   FormsControllerFindAllData,
   FormsControllerFindOneByIdData,
@@ -90,6 +92,26 @@ export class Forms<
     this.request<FormsControllerRemoveData, void>({
       path: `/forms/${slug}/${id}`,
       method: 'DELETE',
+      ...params,
+    });
+  /**
+   * No description
+   *
+   * @tags 2.2. Forms
+   * @name FormsControllerBatchRemove
+   * @summary 폼 일괄 삭제
+   * @request POST:/forms/{slug}/batch-delete
+   */
+  formsControllerBatchRemove = (
+    slug: string,
+    data: BatchDeleteFormDto,
+    params: RequestParams = {},
+  ) =>
+    this.request<FormsControllerBatchRemoveData, void>({
+      path: `/forms/${slug}/batch-delete`,
+      method: 'POST',
+      body: data,
+      type: ContentType.Json,
       ...params,
     });
 }

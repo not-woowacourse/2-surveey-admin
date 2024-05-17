@@ -324,6 +324,14 @@ export interface ReadFormResponseDto {
   answers: AnswerWithQuestion[];
 }
 
+export interface BatchDeleteFormDto {
+  /**
+   * 삭제할 폼 ID 배열
+   * @example [1,2,3]
+   */
+  ids: number[];
+}
+
 export type AppControllerGetHelloData = any;
 
 export type TodosControllerCreateData = CreateTodoResponseDto;
@@ -349,3 +357,5 @@ export type FormsControllerFindAllData = ReadFormResponseDto[];
 export type FormsControllerFindOneByIdData = ReadFormResponseDto;
 
 export type FormsControllerRemoveData = any;
+
+export type FormsControllerBatchRemoveData = any;

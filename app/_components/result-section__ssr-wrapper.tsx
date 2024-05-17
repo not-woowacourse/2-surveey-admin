@@ -33,18 +33,17 @@ type ResultSectionProps = {
 };
 
 const ResultSection = ({ formValues }: ResultSectionProps) => {
-  const { clientName, schemaSlug } = formValues;
   const setSearchState = useSetRecoilState(searchStateAtom);
 
   const results = useQueries({
     queries: [
       {
         queryKey: QUERY_KEYS.SCHEMA(formValues),
-        queryFn: axiosGetSchema({ clientName, schemaSlug }),
+        queryFn: () => axiosGetSchema(formValues),
       },
       {
         queryKey: QUERY_KEYS.FORMS(formValues),
-        queryFn: axiosGetForms({ clientName, schemaSlug }),
+        queryFn: () => axiosGetForms(formValues),
         refetchInterval: 10000,
       },
     ],
@@ -90,7 +89,12 @@ const ResultSection = ({ formValues }: ResultSectionProps) => {
 
   return (
     <section>
-      <ResultSectionDataTable headers={headers} data={data} schema={schema} />
+      <ResultSectionDataTable
+        headers={headers}
+        data={data}
+        schema={schema}
+        formValues={formValues}
+      />
     </section>
   );
 };
